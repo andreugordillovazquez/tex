@@ -1,5 +1,5 @@
 {
-  "name": "latex",
+  "name": "tex",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,24 +11,34 @@
     "pack": "npx framer-plugin-tools@latest pack"
   },
   "dependencies": {
+    "@octokit/core": "^6.1.4",
+    "@octokit/plugin-paginate-rest": "^11.4.2",
+    "@octokit/request": "^9.2.2",
+    "@octokit/rest": "^21.1.1",
+    "@triozer/framer-toolbox": "^0.6.0",
+    "@types/html2canvas": "^0.5.35",
+    "@types/katex": "^0.16.7",
+    "esbuild": "^0.25.0",
     "framer-plugin": "^2",
+    "html2canvas": "^1.4.1",
+    "katex": "^0.16.21",
     "react": "^18",
     "react-dom": "^18",
     "vite-plugin-mkcert": "^1"
   },
   "devDependencies": {
     "@eslint/js": "^9",
-    "@types/react-dom": "^18",
     "@types/react": "^18",
-    "@vitejs/plugin-react-swc": "^3",
-    "@vitejs/plugin-react": "^4.3.1",
+    "@types/react-dom": "^18",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react-swc": "^3.8.0",
+    "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.9",
-    "typescript-eslint": "^8.0.1",
-    "vite-plugin-framer": "^1",
-    "eslint": "^9.9.0",
     "globals": "^15.9.0",
     "typescript": "^5.3",
-    "vite": "^6"
+    "typescript-eslint": "^8.0.1",
+    "vite": "^6.1.1",
+    "vite-plugin-framer": "^1"
   }
 }

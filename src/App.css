@@ -1,10 +1,278 @@
-/* Your Plugin CSS */
+/* Dark theme styles */
+[data-framer-theme="dark"] .latex-input {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+[data-framer-theme="dark"] .gui-row .gui-label {
+  color: #ccc;
+}
+
+/* Light theme styles */
+[data-framer-theme="light"] .latex-input {
+  background-color: #f3f3f3;
+  color: #000000;
+}
+
+[data-framer-theme="light"] .latex-preview {
+  color: #000000;
+}
+
+[data-framer-theme="light"] .gui-row .gui-label {
+  color: #666666;
+}
+
+[data-framer-theme="light"] .gui-row .gui-select {
+  background-color: #f3f3f3;
+  color: #000;
+}
+
+[data-framer-theme="light"] .color-input {
+  background-color: #f3f3f3;
+}
+
+[data-framer-theme="light"] .color-input input[type="color"]::after {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+[data-framer-theme="light"] .submit {
+  background-color: #000 !important;
+  color: #fff;
+  font-weight: 500;
+}
+
+[data-framer-theme="light"] .submit:hover {
+  background-color: #333 !important;
+}
 
 main {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    padding: 0 15px 15px 15px;
-    height: 100%;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  padding: 0 15px 15px 15px;
+  height: 100%;
+}
+
+.input-container {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.paragraph {
+  font-size: 12px;
+  color: #fff;
+}
+
+.latex-input {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  max-height: 100px;
+  min-height: 100px;
+  resize: none;
+}
+
+.latex-input:focus {
+  outline: none;
+}
+
+.latex-input::placeholder {
+  color: #666666;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.2em;
+  opacity: 1;
+}
+
+/* Outer container for the plugin preview (visible border/radius) */
+.latex-preview {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-x: auto;
+  
+  /* Add flex display to the outer container */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Smoothing, etc. for the plugin UI */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+
+/* Inner container: no border or radius so it won't appear in final image */
+.latex-capture-target {
+  /* Force no border/radius in case a parent style is inherited */
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+
+  /* Center the KaTeX content */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+/* Adjust KaTeX styles inside the capture container */
+.latex-capture-target .katex {
+  font-size: 1.5em;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+}
+
+.error-message {
+  color: #ff3b30;
+  font-size: 12px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+/* General GUI container */
+.gui {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.gui select {
+  cursor: pointer;
+}
+
+/* Row layout for controls */
+.gui-row {
+  position: relative;
+  display: -ms-grid;
+  display: grid;
+  width: 100%;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  -webkit-column-gap: 10px;
+  column-gap: 10px;
+  -ms-grid-columns: minmax(0, 1.5fr) repeat(2, minmax(62px, 1fr));
+  grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(62px, 1fr));
+  -ms-grid-rows: auto;
+  grid-template-rows: auto;
+  height: 40px;
+  align-items: center;
+}
+
+/* Control labels */
+.gui-row .gui-label {
+  align-self: center;
+  padding-left: 15px;
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+/* Dropdown select control */
+.gui-row .gui-select {
+  grid-column: 2 / -1;
+  width: 100%;
+  height: 30px;
+  border-radius: 8px;
+  background-color: rgb(43, 43, 43);
+  color: #fff;
+  border: none;
+  padding: 0 10px;
+}
+
+/* Section headings */
+.preview-heading {
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  color: var(--framer-text-color-primary);
+  font-size: 12px;
+  letter-spacing: 0em;
+  line-height: 1.5em;
+}
+
+.color-input {
+  grid-column: 2 / -1;
+  height: 30px;
+  min-height: 30px;
+  border-radius: 8px;
+  border: transparent;
+  background-color: rgb(43, 43, 43);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.color-input span {
+  flex-grow: 1;
+}
+
+.color-input .color {
+  text-transform: uppercase;
+}
+
+.color-input .placeholder {
+  color: #999999;
+}
+
+.color-input .erase {
+  width: 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999999;
+}
+
+.color-input input[type="color"] {
+  cursor: pointer;
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  height: 22px;
+  width: 22px;
+  margin-right: 8px;
+  margin-left: 4px;
+  padding: 0;
+  outline: none;
+  box-shadow: unset;
+}
+
+.color-input input[type="color"]::after {
+  content: "";
+  position: absolute;
+  inset: 0px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.color-input input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-input input[type="color"]::-webkit-color-swatch {
+  border: none;
+}
+
+.submit {
+  width: 100%;
+  color: #000;
+  background-color: #fff !important;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 12px;
+  border-radius: 8px;
+  padding: 8px 16px;
+  line-height: 1em;
+  border: none;
+}
+
+.submit:hover {
+  background-color: #f2f2f2 !important;
 }

@@ -1,8 +1,8 @@
 {
   "id": "318518",
-  "name": "Latex",
+  "name": "TeX",
   "modes": [
     "canvas"
   ],
-  "icon": "/icon.svg"
+  "icon": "/Icon.svg"
 }
