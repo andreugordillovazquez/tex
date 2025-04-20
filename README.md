@@ -1,4 +1,4 @@
-# TeX - Framer Plugin
+# TeX — Framer plugin
 
 This plugin for Framer allows you to effortlessly convert LaTeX expressions into beautiful images for your Framer projects. It transforms your typed LaTeX formulas into high-resolution images, perfect for enhancing websites with mathematical expressions, equations, and technical content.
 
