@@ -2,7 +2,7 @@
 
 This plugin for Framer allows you to effortlessly convert LaTeX expressions into beautiful images for your Framer projects. It transforms your typed LaTeX formulas into high-resolution images, perfect for enhancing websites with mathematical expressions, equations, and technical content.
 
-![Plugin window screenshot](images/main.png)
+![Plugin interface](images/main.png)
 
 ## Features
 
@@ -22,14 +22,14 @@ This plugin for Framer allows you to effortlessly convert LaTeX expressions into
 4. Preview your rendered equation
 5. Click "Add to Canvas" to insert the image into your design
 
-## File Structure
+## File structure
 
-- `src/App.tsx`: Main component that provides the UI and handles the logic for converting quotes
-- `src/App.css`: Styles for the plugin interface
-- `src/ColorInput.tsx`: Component for color input functionality
-- `src/main.tsx`: Entry point for the plugin
-- `public/`: Contains static assets and images
-- `dist/`: Contains the built plugin files
+- `src/App.tsx` — Main component that provides the UI and handles the rendering logic
+- `src/App.css` — Styles for the plugin interface
+- `src/ColorInput.tsx` — Component for color input functionality
+- `src/main.tsx` — Entry point for the plugin
+- `public/` — Contains static assets and images
+- `dist/` — Contains the built plugin files
 
 ## Development
 
