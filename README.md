@@ -2,7 +2,7 @@
 
 This plugin for Framer allows you to effortlessly convert LaTeX expressions into beautiful SVG images for your Framer projects. It transforms your typed LaTeX formulas into high-quality SVG graphics using MathJax, perfect for enhancing websites with mathematical expressions, equations, and technical content.
 
-![Plugin interface](images/main.png)
+![Plugin interface](images/back.png)
 
 ## Features
 
