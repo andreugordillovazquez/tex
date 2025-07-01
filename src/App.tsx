@@ -207,11 +207,18 @@ export function App() {
         frameHeight = h * scale;
       }
 
-      // 2. Create the frame node with dynamic size
+      // 2. Upload the image
+      const image = await framer.uploadImage({
+        image: svgToDataUrl(previewSvg),
+        altText: latexInput
+      })
+
+      // 3. Create the frame node with dynamic size
       const frame = await framer.createFrameNode({
         width: `${frameWidth}px`,
         height: `${frameHeight}px`,
-        name: "Equation Frame"
+        name: "Equation Frame",
+        backgroundImage: image
       });
 
       if (!frame) {
@@ -219,19 +226,13 @@ export function App() {
         return;
       }
 
-      // 3. Select the frame node by its ID
+      // 4. Select the frame node by its ID
       if (frame.id) {
         await framer.setSelection([frame.id]);
       } else {
         framer.notify("Frame node has no ID", { variant: "error", durationMs: 3000 });
         return;
       }
-
-      // 4. Set the image as the fill of the selected frame
-      await framer.setImage({
-        image: svgToDataUrl(previewSvg),
-        altText: latexInput
-      });
 
       framer.notify("Equation added to canvas", { variant: "success", durationMs: 3000 });
     } catch (err) {
