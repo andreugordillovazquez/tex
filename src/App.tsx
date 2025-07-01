@@ -244,7 +244,7 @@ export function App() {
     <main>
       <div className="input-container">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <p>Convert LaTeX expressions into SVG images for your website.</p>
+          <p>Convert LaTeX expressions into images for your website.</p>
           <textarea
             className="latex-input"
             value={latexInput}
