@@ -123,12 +123,14 @@ main {
   margin: 0;
 }
 
-/* Adjust KaTeX styles inside the capture container */
-.latex-capture-target .katex {
+/* Adjust MathJax SVG styles inside the capture container */
+.latex-capture-target svg {
   font-size: 1.5em;
   line-height: 1;
   margin: 0;
   padding: 0;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .error-message {
