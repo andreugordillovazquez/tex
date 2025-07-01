@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-framer.showUI({ position: "top right", width: 260, height: 444, resizable: false })
+framer.showUI({ position: "top right", width: 260, height: 406, resizable: false })
 
 export function App() {
   // LaTeX input and rendering
