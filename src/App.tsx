@@ -145,8 +145,16 @@ export function App() {
     const originalSvg = new DOMParser().parseFromString(svgString, 'image/svg+xml').documentElement;
     const viewBox = originalSvg.getAttribute('viewBox') || '0 0 100 50';
     const [x, y, w, h] = viewBox.split(' ').map(Number);
+    // Increase padding to 24px
+    const padding = 100;
+    const newX = x - padding;
+    const newY = y - padding;
+    const newW = w + 2 * padding;
+    const newH = h + 2 * padding;
+    const newViewBox = `${newX} ${newY} ${newW} ${newH}`;
+    // Keep a fixed width for display, but scale height to match aspect ratio
     const targetWidth = 300;
-    const aspect = w / h;
+    const aspect = newW / newH;
     const targetHeight = Math.round(targetWidth / aspect);
 
     // Remove width/height attributes from the original SVG content
@@ -155,7 +163,7 @@ export function App() {
 
     // Create a new SVG wrapper with explicit width/height and viewBox
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', viewBox);
+    svg.setAttribute('viewBox', newViewBox);
     svg.setAttribute('width', targetWidth.toString());
     svg.setAttribute('height', targetHeight.toString());
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
