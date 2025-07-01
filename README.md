@@ -1,15 +1,15 @@
 # TeX — Framer plugin
 
-This plugin for Framer allows you to effortlessly convert LaTeX expressions into beautiful images for your Framer projects. It transforms your typed LaTeX formulas into high-resolution images, perfect for enhancing websites with mathematical expressions, equations, and technical content.
+This plugin for Framer allows you to effortlessly convert LaTeX expressions into beautiful SVG images for your Framer projects. It transforms your typed LaTeX formulas into high-quality SVG graphics using MathJax, perfect for enhancing websites with mathematical expressions, equations, and technical content.
 
 ![Plugin interface](images/main.png)
 
 ## Features
 
-- Instantly render LaTeX expressions as high-quality images
+- Instantly render LaTeX expressions as high-quality SVG images using MathJax
 - Customize text color, background color, and output resolution
 - Preview the rendered equation before adding it to the canvas
-- Seamlessly insert the final image into your design with a single click
+- Seamlessly insert the final SVG image into your design with a single click
 
 ## Usage
 
@@ -54,6 +54,7 @@ To develop and extend the plugin:
    ```
 
 The plugin uses:
+- MathJax for LaTeX to SVG rendering
 - TypeScript for type safety
 - Vite for development and building
 - ESLint for code quality
