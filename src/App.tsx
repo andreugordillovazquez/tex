@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-framer.showUI({ position: "top right", width: 260, height: 406, resizable: false })
+framer.showUI({ position: "top right", width: 260, height: 444, resizable: false })
 
 export function App() {
   // LaTeX input and rendering
@@ -32,7 +32,6 @@ export function App() {
       script.async = true
       
       script.onload = () => {
-        console.log('MathJax script loaded')
         // Wait a bit for MathJax to fully initialize
         setTimeout(() => {
           if (window.MathJax && window.MathJax.typesetPromise) {
@@ -60,7 +59,6 @@ export function App() {
               }
             }
             setIsMathJaxReady(true)
-            console.log('MathJax ready for use')
           }
         }, 1000)
       }
@@ -147,8 +145,7 @@ export function App() {
     const originalSvg = new DOMParser().parseFromString(svgString, 'image/svg+xml').documentElement;
     const viewBox = originalSvg.getAttribute('viewBox') || '0 0 100 50';
     const [x, y, w, h] = viewBox.split(' ').map(Number);
-    const padding = 5;
-    const targetWidth = 300 + padding * 2 * (w / 300); // scale padding proportionally
+    const targetWidth = 300;
     const aspect = w / h;
     const targetHeight = Math.round(targetWidth / aspect);
 
@@ -156,19 +153,16 @@ export function App() {
     originalSvg.removeAttribute('width');
     originalSvg.removeAttribute('height');
 
-    // Create a new SVG wrapper with explicit width/height and viewBox, and add padding
+    // Create a new SVG wrapper with explicit width/height and viewBox
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', `${x - padding} ${y - padding} ${w + padding * 2} ${h + padding * 2}`);
-    svg.setAttribute('width', (w + padding * 2).toString());
-    svg.setAttribute('height', (h + padding * 2).toString());
+    svg.setAttribute('viewBox', viewBox);
+    svg.setAttribute('width', targetWidth.toString());
+    svg.setAttribute('height', targetHeight.toString());
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     svg.style.backgroundColor = bgColor;
 
-    // Wrap the original SVG content in a <g> with translation for padding
-    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    g.setAttribute('transform', `translate(${padding},${padding})`);
-    g.innerHTML = originalSvg.innerHTML;
-    svg.appendChild(g);
+    // Insert the original SVG content
+    svg.innerHTML = originalSvg.innerHTML;
 
     // Data URL
     const svgStringWithBackground = svg.outerHTML;
@@ -199,7 +193,6 @@ export function App() {
       let frameHeight = 200;
       if (viewBox) {
         const [, , w, h] = viewBox.split(" ").map(Number);
-        console.log("SVG size", w, h)
         // Optional: scale up/down
         const scale = 0.1;
         frameWidth = w * scale;
