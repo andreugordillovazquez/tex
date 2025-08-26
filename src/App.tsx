@@ -13,6 +13,9 @@ declare global {
 framer.showUI({ position: "top right", width: 260, height: 406, resizable: false })
 
 export function App() {
+  // Plugin mode
+  const pluginMode = framer.mode
+  
   // LaTeX input and rendering
   const [latexInput, setLatexInput] = useState("")
   const [previewSvg, setPreviewSvg] = useState("")
@@ -178,8 +181,8 @@ export function App() {
     return `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
   };
 
-  // Add LaTeX image to canvas
-  const handleAddLatexImage = async () => {
+  // Add LaTeX image to canvas (canvas mode)
+  const handleAddLatexImageToCanvas = async () => {
     if (!latexInput.trim()) {
       framer.notify("Please enter a LaTeX equation", { variant: "error", durationMs: 3000 })
       return
@@ -241,11 +244,50 @@ export function App() {
     }
   }
 
+  // Set LaTeX image (image mode)
+  const handleSetLatexImage = async () => {
+    if (!latexInput.trim()) {
+      framer.notify("Please enter a LaTeX equation", { variant: "error", durationMs: 3000 })
+      return
+    }
+
+    if (!previewSvg) {
+      framer.notify("Please wait for equation to render", { variant: "error", durationMs: 3000 })
+      return
+    }
+
+    try {
+      // Set the image directly in image mode
+      await framer.setImage({
+        image: svgToDataUrl(previewSvg),
+        altText: latexInput
+      })
+      framer.notify("Equation image set", { variant: "success", durationMs: 3000 });
+    } catch (err) {
+      console.error("Failed to set LaTeX image:", err)
+      framer.notify("Failed to set image", { variant: "error", durationMs: 3000 })
+    }
+  }
+
+  // Main handler that delegates based on mode
+  const handleSubmit = async () => {
+    if (pluginMode === "image") {
+      await handleSetLatexImage()
+    } else {
+      await handleAddLatexImageToCanvas()
+    }
+  }
+
   return (
     <main>
       <div className="input-container">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <p>Convert LaTeX expressions into images for your website.</p>
+          <p>
+            {pluginMode === "image" 
+              ? "Create a LaTeX equation image to use in your design."
+              : "Convert LaTeX expressions into images for your website."
+            }
+          </p>
           <textarea
             className="latex-input"
             value={latexInput}
@@ -282,10 +324,15 @@ export function App() {
 
         <button 
           className="submit" 
-          onClick={handleAddLatexImage}
+          onClick={handleSubmit}
           disabled={!isMathJaxReady || !previewSvg}
         >
-          {!isMathJaxReady ? "Loading..." : "Add to Canvas"}
+          {!isMathJaxReady 
+            ? "Loading..." 
+            : pluginMode === "image" 
+              ? "Use Equation" 
+              : "Add to Canvas"
+          }
         </button>
       </div>
     </main>

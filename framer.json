@@ -2,7 +2,8 @@
   "id": "318518",
   "name": "TeX",
   "modes": [
-    "canvas"
+    "canvas",
+    "image"
   ],
   "icon": "/icon.svg"
 }

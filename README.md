@@ -2,6 +2,8 @@
 
 This plugin for Framer allows you to effortlessly convert LaTeX expressions into beautiful SVG images for your Framer projects. It transforms your typed LaTeX formulas into high-quality SVG graphics using MathJax, perfect for enhancing websites with mathematical expressions, equations, and technical content.
 
+The plugin supports both canvas and image modes, making it accessible from the canvas editor as well as from Framer's image picker throughout your design workflow.
+
 ![Plugin interface](images/back.png)
 
 ## Features
@@ -9,18 +11,32 @@ This plugin for Framer allows you to effortlessly convert LaTeX expressions into
 - Instantly render LaTeX expressions as high-quality SVG images using MathJax
 - Customize text color, background color, and output resolution
 - Preview the rendered equation before adding it to the canvas
+- **Canvas Mode**: Create frame elements with equation images directly on the canvas
+- **Image Mode**: Use equations as image assets anywhere in Framer (image picker, CMS, localization)
 - Seamlessly insert the final SVG image into your design with a single click
 
 ## Usage
 
-1. Open the TeX plugin in Framer
+The TeX plugin can be used in two different modes:
+
+### Canvas Mode
+1. Open the TeX plugin from the canvas in Framer
 2. Type your LaTeX expression in the input field
 3. Customize the appearance:
    - Adjust text color using the color picker
    - Change background color or make it transparent
-   - Select the desired output resolution
 4. Preview your rendered equation
-5. Click "Add to Canvas" to insert the image into your design
+5. Click "Add to Canvas" to create a frame with the equation image
+
+### Image Mode
+1. Click on any image placeholder or use the image picker in Framer
+2. Select "TeX" from the available plugins
+3. Type your LaTeX expression in the input field
+4. Customize the appearance with color options
+5. Preview your rendered equation
+6. Click "Use Equation" to set it as the selected image
+
+The plugin automatically adapts its interface and behavior based on how it's launched, providing a seamless experience in both contexts.
 
 ## File structure
 
