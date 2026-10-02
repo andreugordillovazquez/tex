@@ -271,7 +271,8 @@ test("image mode preserves light-theme colors and reuses the starter selector", 
   try {
     await app.example(2)
     await app.settle()
-    assert.equal(document.querySelector("select").value, "")
+    assert.equal(document.querySelector("select").value, document.querySelector("textarea").value)
+    assert.equal(document.querySelector("select").selectedOptions[0].textContent, "Matrix")
     await app.example(2)
     assert.equal(app.submit.disabled, false, "selecting the current example must keep its valid preview")
     assert.equal(app.submit.textContent, "Use Equation")
@@ -283,9 +284,12 @@ test("image mode preserves light-theme colors and reuses the starter selector", 
     assert.equal(svg.getAttribute("color"), "#000000")
     assert.equal(svg.firstElementChild.getAttribute("fill"), "#F3F3F3")
     await app.input("changed")
+    assert.equal(document.querySelector("select").value, "")
+    assert.equal(document.querySelector("select").selectedOptions[0].textContent, "Custom equation")
     await app.example(2)
     await app.settle()
     assert.equal(document.querySelector("textarea").value, app.calls.image[0].altText)
+    assert.equal(document.querySelector("select").selectedOptions[0].textContent, "Matrix")
   } finally {
     await app.unmount()
   }
