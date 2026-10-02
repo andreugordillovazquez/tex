@@ -145,29 +145,13 @@ export function App() {
               : "Convert LaTeX expressions into images for your website."
             }
           </p>
-          <div>
-            <div className="gui-row">
-              <label className="gui-label" htmlFor="equation-example">Example</label>
-              <select
-                id="equation-example"
-                className="gui-select"
-                value={selectedExample}
-                onChange={e => changeLatex(e.target.value)}
-              >
-                <option value="" disabled>{latexInput.trim() ? "Custom equation" : "Choose example..."}</option>
-                {equationExamples.map(example => (
-                  <option key={example.label} value={example.latex}>{example.label}</option>
-                ))}
-              </select>
-            </div>
-            <textarea
-              className="latex-input"
-              aria-label="LaTeX equation"
-              value={latexInput}
-              onChange={e => changeLatex(e.target.value)}
-              placeholder={`Insert LaTeX equation\ne.g. \\frac{a}{b}`}
-            />
-          </div>
+          <textarea
+            className="latex-input"
+            aria-label="LaTeX equation"
+            value={latexInput}
+            onChange={e => changeLatex(e.target.value)}
+            placeholder={`Insert LaTeX equation\ne.g. \\frac{a}{b}`}
+          />
           <div className="latex-preview" style={{ backgroundColor: bgColor || "transparent" }} aria-busy={isRendering}>
             {currentPreview ? (
               <div
@@ -188,6 +172,20 @@ export function App() {
         </div>
 
         <div className="gui">
+          <div className="gui-row">
+            <label className="gui-label" htmlFor="equation-example">Example</label>
+            <select
+              id="equation-example"
+              className="gui-select"
+              value={selectedExample}
+              onChange={e => changeLatex(e.target.value)}
+            >
+              <option value="" disabled>{latexInput.trim() ? "Custom equation" : "Choose example..."}</option>
+              {equationExamples.map(example => (
+                <option key={example.label} value={example.latex}>{example.label}</option>
+              ))}
+            </select>
+          </div>
           <div className="gui-row">
             <label className="gui-label">Text</label>
             <ColorInput label="Text color" value={textColor} onChange={value => {
