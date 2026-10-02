@@ -2,336 +2,212 @@ import { framer } from "framer-plugin"
 import { useState, useEffect, useRef } from "react"
 import "./App.css"
 import { ColorInput } from "./ColorInput"
+import { createEquationImage, type EquationImage } from "./equation"
+import { equationExamples } from "./examples"
+import { loadMathJax, renderEquation } from "./mathjax"
 
-// MathJax types
-declare global {
-  interface Window {
-    MathJax: any
-  }
+// The additional example row uses the existing controls and needs 40px of space.
+framer.showUI({ position: "top right", width: 260, height: 446, resizable: false })
+
+interface Preview {
+  latex: string
+  textColor: string
+  bgColor: string | false
+  image: EquationImage
 }
 
-framer.showUI({ position: "top right", width: 260, height: 406, resizable: false })
-
 export function App() {
-  // Plugin mode
   const pluginMode = framer.mode
-  
-  // LaTeX input and rendering
   const [latexInput, setLatexInput] = useState("")
-  const [previewSvg, setPreviewSvg] = useState("")
+  const [preview, setPreview] = useState<Preview | null>(null)
   const [textColor, setTextColor] = useState("#FFFFFF")
-  const [bgColor, setBgColor] = useState("#000000")
-  const [isMathJaxReady, setIsMathJaxReady] = useState(false)
+  const [bgColor, setBgColor] = useState<string | false>("#000000")
+  const [rendererState, setRendererState] = useState<"loading" | "ready" | "error">("loading")
+  const [loadAttempt, setLoadAttempt] = useState(0)
+  const [error, setError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const submittingRef = useRef(false)
 
-  // Reference for the preview element
-  const previewRef = useRef<HTMLDivElement>(null)
-
-  // Initialize MathJax
   useEffect(() => {
-    const loadMathJax = async () => {
-      // Load MathJax tex-svg component directly
-      const script = document.createElement('script')
-      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js'
-      script.async = true
-      
-      script.onload = () => {
-        // Wait a bit for MathJax to fully initialize
-        setTimeout(() => {
-          if (window.MathJax && window.MathJax.typesetPromise) {
-            // Configure MathJax after it's loaded
-            window.MathJax = {
-              ...window.MathJax,
-              tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true,
-                processEnvironments: true
-              },
-              svg: {
-                fontCache: 'global'
-              },
-              options: {
-                enableMenu: false,
-                menuOptions: {
-                  settings: {
-                    texHints: true,
-                    semantics: false,
-                    renderer: 'SVG'
-                  }
-                }
-              }
-            }
-            setIsMathJaxReady(true)
-          }
-        }, 1000)
-      }
-      
-      script.onerror = (error) => {
-        console.error('Failed to load MathJax:', error)
-        framer.notify("Failed to load MathJax", { variant: "error", durationMs: 3000 })
-      }
-      
-      document.head.appendChild(script)
-    }
+    let cancelled = false
+    setRendererState("loading")
+    setError("")
+    loadMathJax().then(() => {
+      if (!cancelled) setRendererState("ready")
+    }).catch((error: unknown) => {
+      if (cancelled) return
+      setRendererState("error")
+      setError(error instanceof Error ? error.message : "Could not load the equation renderer. Please retry.")
+    })
+    return () => { cancelled = true }
+  }, [loadAttempt])
 
-    loadMathJax()
-  }, [])
-
-  // Theme-based default colors
   useEffect(() => {
     const isDark = document.body.getAttribute("data-framer-theme") === "dark"
     setTextColor(isDark ? "#FFFFFF" : "#000000")
     setBgColor(isDark ? "#000000" : "#F3F3F3")
   }, [])
 
-  // Render LaTeX to SVG
   useEffect(() => {
-    if (!isMathJaxReady || !latexInput) {
-      setPreviewSvg("")
-      return
-    }
+    setPreview(null)
+    if (rendererState !== "ready") return
+    setError("")
+    if (!latexInput.trim()) return
 
-    const renderMath = async () => {
+    let cancelled = false
+    const timeout = window.setTimeout(async () => {
       try {
-        // Create a temporary container for MathJax processing
-        const tempContainer = document.createElement('div')
-        tempContainer.innerHTML = `$$${latexInput}$$`
-        tempContainer.style.position = 'absolute'
-        tempContainer.style.left = '-9999px'
-        tempContainer.style.top = '-9999px'
-        document.body.appendChild(tempContainer)
-
-        // Process with MathJax
-        await window.MathJax.typesetPromise([tempContainer])
-        
-        // Extract SVG
-        const svgElement = tempContainer.querySelector('svg')
-        if (svgElement) {
-          // Clone the SVG to avoid reference issues
-          const clonedSvg = svgElement.cloneNode(true) as SVGElement
-
-          // Set text color on all relevant SVG elements
-          const setFillColor = (el: Element) => {
-            // Set fill for text, path, g, use, and tspan elements
-            if (["path", "g", "text", "use", "tspan"].includes(el.tagName)) {
-              (el as HTMLElement).setAttribute("fill", textColor)
-            }
-            // Recursively set fill on children
-            for (const child of Array.from(el.children)) {
-              setFillColor(child)
-            }
-          }
-          setFillColor(clonedSvg)
-
-          // Set background color (for completeness, but SVG bg is handled elsewhere)
-          clonedSvg.style.backgroundColor = bgColor
-
-          // Convert to string
-          const svgString = new XMLSerializer().serializeToString(clonedSvg)
-          setPreviewSvg(svgString)
+        const svg = await renderEquation(latexInput)
+        if (cancelled) return
+        const image = createEquationImage(svg, textColor, bgColor)
+        setPreview({ latex: latexInput, textColor, bgColor, image })
+      } catch (error: unknown) {
+        if (!cancelled) {
+          setError(error instanceof Error ? error.message : "Invalid LaTeX equation.")
         }
-
-        // Clean up
-        document.body.removeChild(tempContainer)
-      } catch (error) {
-        console.error('MathJax rendering error:', error)
-        framer.notify("Invalid LaTeX equation", { variant: "error", durationMs: 3000 })
       }
+    }, 150)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timeout)
     }
+  }, [latexInput, rendererState, textColor, bgColor])
 
-    renderMath()
-  }, [latexInput, isMathJaxReady, textColor, bgColor])
+  // Comparing the inputs also blocks submission before the effect has invalidated a previous preview.
+  const currentPreview = preview && preview.latex === latexInput &&
+    preview.textColor === textColor && preview.bgColor === bgColor ? preview : null
+  const isRendering = rendererState === "ready" && !!latexInput.trim() && !currentPreview && !error
+  const selectedExample = equationExamples.find(example => example.latex === latexInput)?.latex || ""
 
-  // Convert SVG to data URL
-  const svgToDataUrl = (svgString: string): string => {
-    // Parse the original SVG
-    const originalSvg = new DOMParser().parseFromString(svgString, 'image/svg+xml').documentElement;
-    const viewBox = originalSvg.getAttribute('viewBox') || '0 0 100 50';
-    const [x, y, w, h] = viewBox.split(' ').map(Number);
-    // Increase padding to 24px
-    const padding = 100;
-    const newX = x - padding;
-    const newY = y - padding;
-    const newW = w + 2 * padding;
-    const newH = h + 2 * padding;
-    const newViewBox = `${newX} ${newY} ${newW} ${newH}`;
-    // Keep a fixed width for display, but scale height to match aspect ratio
-    const targetWidth = 300;
-    const aspect = newW / newH;
-    const targetHeight = Math.round(targetWidth / aspect);
-
-    // Remove width/height attributes from the original SVG content
-    originalSvg.removeAttribute('width');
-    originalSvg.removeAttribute('height');
-
-    // Create a new SVG wrapper with explicit width/height and viewBox
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', newViewBox);
-    svg.setAttribute('width', targetWidth.toString());
-    svg.setAttribute('height', targetHeight.toString());
-    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    svg.style.backgroundColor = bgColor;
-
-    // Insert the original SVG content
-    svg.innerHTML = originalSvg.innerHTML;
-
-    // Data URL
-    const svgStringWithBackground = svg.outerHTML;
-    const encodedSvg = encodeURIComponent(svgStringWithBackground);
-    return `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
-  };
-
-  // Add LaTeX image to canvas (canvas mode)
-  const handleAddLatexImageToCanvas = async () => {
-    if (!latexInput.trim()) {
-      framer.notify("Please enter a LaTeX equation", { variant: "error", durationMs: 3000 })
-      return
-    }
-
-    if (!previewSvg) {
-      framer.notify("Please wait for equation to render", { variant: "error", durationMs: 3000 })
-      return
-    }
-
-    try {
-      // 1. Parse the SVG to get its natural size
-      const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(previewSvg, "image/svg+xml");
-      const svgElement = svgDoc.documentElement;
-      const viewBox = svgElement.getAttribute("viewBox");
-
-      let frameWidth = 600;
-      let frameHeight = 200;
-      if (viewBox) {
-        const [, , w, h] = viewBox.split(" ").map(Number);
-        // Optional: scale up/down
-        const scale = 0.1;
-        frameWidth = w * scale;
-        frameHeight = h * scale;
-      }
-
-      // 2. Upload the image
-      const image = await framer.uploadImage({
-        image: svgToDataUrl(previewSvg),
-        altText: latexInput
-      })
-
-      // 3. Create the frame node with dynamic size
-      const frame = await framer.createFrameNode({
-        width: `${frameWidth}px`,
-        height: `${frameHeight}px`,
-        name: "Equation Frame",
-        backgroundImage: image
-      });
-
-      if (!frame) {
-        framer.notify("Failed to create frame", { variant: "error", durationMs: 3000 });
-        return;
-      }
-
-      // 4. Select the frame node by its ID
-      if (frame.id) {
-        await framer.setSelection([frame.id]);
-      } else {
-        framer.notify("Frame node has no ID", { variant: "error", durationMs: 3000 });
-        return;
-      }
-
-      framer.notify("Equation added to canvas", { variant: "success", durationMs: 3000 });
-    } catch (err) {
-      console.error("Failed to add LaTeX image:", err)
-      framer.notify("Failed to add image to canvas", { variant: "error", durationMs: 3000 })
-    }
+  const changeLatex = (value: string) => {
+    if (value === latexInput) return
+    setLatexInput(value)
+    setPreview(null)
+    if (rendererState === "ready") setError("")
   }
 
-  // Set LaTeX image (image mode)
-  const handleSetLatexImage = async () => {
-    if (!latexInput.trim()) {
-      framer.notify("Please enter a LaTeX equation", { variant: "error", durationMs: 3000 })
-      return
-    }
-
-    if (!previewSvg) {
-      framer.notify("Please wait for equation to render", { variant: "error", durationMs: 3000 })
-      return
-    }
-
-    try {
-      // Set the image directly in image mode
-      await framer.setImage({
-        image: svgToDataUrl(previewSvg),
-        altText: latexInput
-      })
-      framer.notify("Equation image set", { variant: "success", durationMs: 3000 });
-    } catch (err) {
-      console.error("Failed to set LaTeX image:", err)
-      framer.notify("Failed to set image", { variant: "error", durationMs: 3000 })
-    }
-  }
-
-  // Main handler that delegates based on mode
   const handleSubmit = async () => {
-    if (pluginMode === "image") {
-      await handleSetLatexImage()
-    } else {
-      await handleAddLatexImageToCanvas()
+    if (rendererState === "error") {
+      setRendererState("loading")
+      setError("")
+      setLoadAttempt(attempt => attempt + 1)
+      return
     }
+    if (!currentPreview || submittingRef.current) return
+
+    submittingRef.current = true
+    setIsSubmitting(true)
+    try {
+      const imageInput = { image: currentPreview.image.dataUrl, altText: currentPreview.latex }
+      if (pluginMode === "image") {
+        await framer.setImage(imageInput)
+        framer.notify("Equation image set", { variant: "success", durationMs: 3000 })
+      } else {
+        const image = await framer.uploadImage(imageInput)
+        const frame = await framer.createFrameNode({
+          width: `${currentPreview.image.width}px`,
+          height: `${currentPreview.image.height}px`,
+          name: "Equation Frame",
+          backgroundImage: image,
+        })
+        if (!frame) throw new Error("Failed to create frame")
+        await framer.setSelection([frame.id])
+        framer.notify("Equation added to canvas", { variant: "success", durationMs: 3000 })
+      }
+    } catch (error) {
+      console.error("Failed to insert equation:", error)
+      framer.notify(pluginMode === "image" ? "Failed to set image" : "Failed to add image to canvas", {
+        variant: "error", durationMs: 3000,
+      })
+    } finally {
+      submittingRef.current = false
+      setIsSubmitting(false)
+    }
+  }
+
+  const previewStyle = {
+    color: textColor,
+    backgroundColor: bgColor || "transparent",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "60px",
   }
 
   return (
     <main>
       <div className="input-container">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <p>
-            {pluginMode === "image" 
+            {pluginMode === "image"
               ? "Create a LaTeX equation image to use in your design."
               : "Convert LaTeX expressions into images for your website."
             }
           </p>
           <textarea
             className="latex-input"
+            aria-label="LaTeX equation"
             value={latexInput}
-            onChange={e => setLatexInput(e.target.value)}
+            onChange={e => changeLatex(e.target.value)}
             placeholder={`Insert LaTeX equation\ne.g. \\frac{a}{b}`}
           />
-          <div className="latex-preview" style={{ backgroundColor: bgColor }}>
-            <div
-              ref={previewRef}
-              className="latex-capture-target"
-              style={{ 
-                color: textColor, 
-                backgroundColor: bgColor,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '60px'
-              }}
-              dangerouslySetInnerHTML={{ __html: previewSvg }}
-            />
+          <div className="latex-preview" style={{ backgroundColor: bgColor || "transparent" }} aria-busy={isRendering}>
+            {currentPreview ? (
+              <div
+                className="latex-capture-target"
+                style={previewStyle}
+                dangerouslySetInnerHTML={{ __html: currentPreview.image.svg }}
+              />
+            ) : (
+              <div className="latex-capture-target" style={previewStyle}>
+                {error ? (
+                  <span className="error-message" role="alert">{error}</span>
+                ) : (
+                  <span role="status">{isRendering ? "Rendering..." : ""}</span>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         <div className="gui">
           <div className="gui-row">
+            <label className="gui-label" htmlFor="equation-example">Example</label>
+            <select
+              id="equation-example"
+              className="gui-select"
+              value={selectedExample}
+              onChange={e => changeLatex(e.target.value)}
+            >
+              <option value="" disabled>{latexInput.trim() ? "Custom equation" : "Choose example..."}</option>
+              {equationExamples.map(example => (
+                <option key={example.label} value={example.latex}>{example.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="gui-row">
             <label className="gui-label">Text</label>
-            <ColorInput value={textColor} onChange={v => setTextColor(v as string)} />
+            <ColorInput label="Text color" value={textColor} onChange={value => {
+              if (value) setTextColor(value)
+            }} />
           </div>
           <div className="gui-row">
             <label className="gui-label">Background</label>
-            <ColorInput value={bgColor} onChange={v => setBgColor(v as string)} />
+            <ColorInput label="Background color" value={bgColor} onChange={setBgColor} erasable />
           </div>
         </div>
 
-        <button 
-          className="submit" 
+        <button
+          className="submit"
           onClick={handleSubmit}
-          disabled={!isMathJaxReady || !previewSvg}
+          disabled={isSubmitting || (rendererState !== "error" && !currentPreview)}
         >
-          {!isMathJaxReady 
-            ? "Loading..." 
-            : pluginMode === "image" 
-              ? "Use Equation" 
-              : "Add to Canvas"
+          {isSubmitting ? "Adding..."
+            : rendererState === "error" ? "Retry loading"
+            : rendererState === "loading" ? "Loading..."
+            : isRendering ? "Rendering..."
+            : pluginMode === "image" ? "Use Equation" : "Add to Canvas"
           }
         </button>
       </div>
